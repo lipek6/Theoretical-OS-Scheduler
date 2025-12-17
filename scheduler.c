@@ -12,11 +12,19 @@ typedef struct
 
 typedef struct
 {
-    int avgRetTime;             // Average return time of the processes on the simulation
+    float avgRetTime;           // Average return time of the processes on the simulation
+    float overhead;             // Ratio between the time of overhead and the total time
     int switchsCnt;             // Amount of times that the scheduler switched the process on execution
     int totalTime;              // Total amount of time to execute all processes
 }simulationData;
 
+
+
+// Functions declaration
+
+process* cloneProcList(process* ogProcList, int nProc);
+void PriorityBased(process *globaProcList, int nProc, int tTroca);
+void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca);
 
 
 int main (void)
@@ -54,11 +62,33 @@ int main (void)
     free(procList);
 }
 
-void RoundRobin(process *procList, int nProc, int quantum, int tTroca)
-{
 
+// Simulates a round Robin algorithm to select the executing process
+void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca)
+{
+    process* localProcList = cloneProcList(globaProcList, nProc);
+
+
+    free(localProcList);
 }
-void PriorityBased(process *procList, int nProc, int tTroca)
-{
 
+
+// Simulates a priority based algorithm to select the executing process
+void PriorityBased(process *globaProcList, int nProc, int tTroca)
+{
+    process* localProcList = cloneProcList(globaProcList, nProc);
+
+    free(localProcList);
+}
+
+
+// Makes a copy of the processes list, so that the functions can't mess with the global processes list
+process* cloneProcList(process* ogProcList, int nProc)
+{
+    process* cpProcList = malloc(sizeof(process) * nProc);
+    for(int i = 0; i < nProc; i++)
+    {
+        cpProcList[i] = ogProcList[i];
+    }
+    return cpProcList;
 }
