@@ -60,19 +60,21 @@ void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca)
     process *localProcList = cloneProcList(globaProcList, nProc);
     FILE* out_robin = fopen("out_robin.txt", "w");
 
+    
     int time = 0;              // Relógio da simulação (ms)
     int finishedCount = 0;     // Quantidade de processos finalizados
-
+    
     int current = -1;          // Índice do processo em execução (-1 = CPU livre)
     int quantumCounter = 0;    // Tempo já usado do quantum atual
-
+    
     int switchTimer = 0;       // Contador regressivo para o tempo de troca
     int nextProcessId = -1;    // Quem será o próximo a assumir após a troca
-
-    /* Fila de prontos (Round Robin usa fila) */
-    int readyQueue[2000];
-    int front = 0;
-    int rear  = 0;
+    
+    // Circular queue 
+    int *readyQueue = malloc(nProc * sizeof(int));
+    int head = 0;
+    int tail = 0;
+    int qCount = 0;
 
     /* Controle para não inserir processo duas vezes */
     int inserted[nProc];
@@ -86,25 +88,31 @@ void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca)
     int switchCount = 0;       // Número de trocas de contexto
     int overheadTime = 0;      // Tempo total gasto em trocas
 
-    fprintf(out_robin, "\n=== ROUND ROBIN ===\n");
+    fprintf(out_robin, "=== ROUND ROBIN ===\n");
     fprintf(out_robin, "Linha do tempo:\n");
 
     /* Loop principal: executa até todos os processos terminarem */
     while (finishedCount < nProc)
     {
-        /* 1) Verifica quais processos chegam neste instante */
+        // VERIFICA CHEGADAS
         for (int i = 0; i < nProc; i++)
         {
             if (localProcList[i].bornTime <= time && !inserted[i])
             {
                 /* Processo entra na fila de prontos */
-                readyQueue[rear++] = i;
+                readyQueue[tail] = i;
+                tail = (tail + 1) % nProc;
+                qCount++;
+                
                 inserted[i] = 1;
             }
         }
         
+        // MÁQUINA DE ESTADOS
+
         if (switchTimer > 0) 
         {
+            // ESTADO: TROCA DE CONTEXTO
             fprintf(out_robin, "t=%d -> Escalonador\n", time);
             switchTimer--;
             overheadTime++;
@@ -120,6 +128,7 @@ void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca)
         
         else if (current != -1) 
         {
+            // ESTADO: EXECUTANDO PROCESSO
             fprintf(out_robin, "t=%d -> P%d\n", time, localProcList[current].ID); // [cite: 22, 72]
             
             localProcList[current].remCpuTime--;
@@ -133,17 +142,23 @@ void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca)
             }
             else if (quantumCounter == quantum) 
             {
-                readyQueue[rear++] = current;
+                readyQueue[tail] = current;
+                tail = (tail + 1) % nProc;
+                qCount++;
+
                 current = -1;
             }
         }
 
         else 
         {            
-            if (front < rear) 
+            // ESTADO: CPU LIVRE (scheduler working)
+            if (qCount > 0) 
             {
-                nextProcessId = readyQueue[front++];
-                
+                nextProcessId = readyQueue[head];
+                head = (head + 1) % nProc;
+                qCount--;
+
                 if (tTroca > 0)
                 {
                     switchCount++;
@@ -170,6 +185,7 @@ void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca)
             }
             else 
             {
+                // ESTADO: IDLE
                 fprintf(out_robin, "t=%d -> IDLE\n", time);
             }
         }    
@@ -191,6 +207,7 @@ void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca)
     fprintf(out_robin, "Tempo total de simulacao: %d ms\n", time); // [cite: 25, 71]    /* Libera a memória da cópia local */
 
     fclose(out_robin);
+    free(readyQueue);
     free(localProcList);
 }
 
