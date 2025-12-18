@@ -217,6 +217,116 @@ void PriorityBased(process *globaProcList, int nProc, int tTroca)
 {
     process* localProcList = cloneProcList(globaProcList, nProc);
     FILE* out_priority = fopen("out_priority.txt", "w");
+    if (out_priority == NULL)
+    {
+        fprintf(stderr, "Failed to create/write on the out_priority.txt file.\n");
+        free(localProcList);
+        return;
+    }
+
+   int time = 0;                    // Simulation timer 
+   int finishedCount = 0;           // Amount of finnished processes to control when we should stop the simulation
+   int current = -1;                // Current process on the execution state (-1 by default means no process executing)
+   int switchTimer = 0;             // Timer to simulate the context switch realized by the scheduler 
+   int nextProcessId = -1;          // Id of the next process on the ready queue
+   
+   int switchCount = 0;             // Counter to save how many times the scheduler needed to change the executing process
+   int overheadTime = 0;            // Time lost on the scheduler menagement of the processes
+   int finishTime[nProc];           // Array to save when each process ended
+
+    fprintf(out_priority, "=== PRIORIDADE (PREEMPTIVO) ===\n");
+    fprintf(out_priority, " Linha do tempo:\n");
+
+
+    while(finishedCount < nProc)
+    {
+        // Choosing the next process
+        int bestProcessId = -1;
+        for(int i = 0; i < nProc; i++)
+        {
+            if (localProcList[i].bornTime <= time && localProcList[i].remCpuTime > 0)
+            {
+                if (bestProcessId == -1) bestProcessId = i;
+                else
+                {
+                    if (localProcList[i].priority < localProcList[bestProcessId].priority)
+                        bestProcessId = i;
+                        
+                    else if (localProcList[i].priority == localProcList[bestProcessId].priority)
+                    {
+                        if (localProcList[i].ID < localProcList[bestProcessId].ID) bestProcessId = i;
+                    }
+                }
+            }
+        }
+
+        // STATE MACHINE
+        
+        if(switchTimer > 0)
+        { // Context swap
+            fprintf(out_priority, "t=%d -> Escalonador\n", time);
+            switchTimer--;
+            overheadTime++;
+
+            if (switchTimer == 0)
+            {
+                current = nextProcessId;
+                nextProcessId = -1;
+            }
+        }
+
+        else if (bestProcessId != current)
+        { // The guy executing isn't the guy with highest priority, we shall take him out
+            if (tTroca > 0 && bestProcessId != -1)
+            {
+                nextProcessId = bestProcessId;
+                switchTimer = tTroca;
+                switchCount++;
+
+                fprintf(out_priority, "t=%d -> Escalonador\n", time);
+                switchTimer--;
+                overheadTime++;
+
+                if(switchTimer == 0)
+                {
+                    current = nextProcessId;
+                    nextProcessId = -1;
+                }
+                else current == -1;
+            }
+            else current == bestProcessId;
+        }
+
+        if(switchTimer == 0 && current != -1)
+        { // Common execution
+            fprintf(out_priority, "t=%d -> P%d\n", time, localProcList[current].ID);
+            localProcList[current].remCpuTime--;
+
+            if(localProcList[current].remCpuTime == 0)
+            {
+                finishTime[current] == time+1;
+                finishedCount++;
+                
+                current = -1;
+            }
+        }
+        else if (switchTimer == 0 && current == -1)
+            fprintf(out_priority, "t=%d -> IDLE\n", time);
+        time++;
+    }
+
+    float totalTurnaround = 0.0;
+    for (int i = 0; i < nProc; i++)
+        totalTurnaround += (finishTime[i] - localProcList[i].bornTime);
+    
+    float overheadFraction = (time > 0) ? (float)overheadTime / time : 0.0;
+
+    fprintf(out_priority, "\n=== RESULTADOS ===\n");
+    fprintf(out_priority, "Tempo medio de retorno: %.2f\n", totalTurnaround / nProc); 
+    fprintf(out_priority, "Numero de chaveamento de processos: %d\n", switchCount);
+    fprintf(out_priority, "Overhead de chaveamento: %.4f (%.2f%%)\n", overheadFraction, overheadFraction * 100); 
+    fprintf(out_priority, "Tempo total de simulacao: %d ms\n", time);
+
 
     fclose(out_priority);
     free(localProcList);
