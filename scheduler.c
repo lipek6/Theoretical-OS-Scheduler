@@ -235,7 +235,7 @@ void PriorityBased(process *globaProcList, int nProc, int tTroca)
    int finishTime[nProc];           // Array to save when each process ended
 
     fprintf(out_priority, "=== PRIORIDADE (PREEMPTIVO) ===\n");
-    fprintf(out_priority, " Linha do tempo:\n");
+    fprintf(out_priority, "Linha do tempo:\n");
 
 
     while(finishedCount < nProc)
@@ -292,19 +292,37 @@ void PriorityBased(process *globaProcList, int nProc, int tTroca)
                     current = nextProcessId;
                     nextProcessId = -1;
                 }
-                else current == -1;
+                else current = -1;
             }
-            else current == bestProcessId;
+            else
+            {
+                current = bestProcessId;
+                if (current != -1)
+                {
+                    fprintf(out_priority, "t=%d -> P%d\n", time, localProcList[current].ID);
+                    localProcList[current].remCpuTime--;
+                    if(localProcList[current].remCpuTime == 0)
+                    {
+                       finishTime[current] = time + 1;
+                       finishedCount++;
+                       current = -1;
+                    }
+                }
+                else
+                {
+                    fprintf(out_priority, "t=%d -> IDLE\n", time);
+                }
+            } 
         }
-
-        if(switchTimer == 0 && current != -1)
+        
+        else if(switchTimer == 0 && current != -1)
         { // Common execution
             fprintf(out_priority, "t=%d -> P%d\n", time, localProcList[current].ID);
             localProcList[current].remCpuTime--;
 
             if(localProcList[current].remCpuTime == 0)
             {
-                finishTime[current] == time+1;
+                finishTime[current] = time+1;
                 finishedCount++;
                 
                 current = -1;
@@ -331,7 +349,6 @@ void PriorityBased(process *globaProcList, int nProc, int tTroca)
     fclose(out_priority);
     free(localProcList);
 }
-
 
 // Makes a copy of the processes list, so that the functions can't mess with the global processes list
 process* cloneProcList(process* ogProcList, int nProc)
