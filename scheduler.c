@@ -10,15 +10,6 @@ typedef struct
     int remCpuTime;              // Remaining CPU time required for the process to finnish
 }process;
 
-typedef struct
-{
-    float avgRetTime;           // Average return time of the processes on the simulation
-    float overhead;             // Ratio between the time of overhead and the total time
-    int switchsCnt;             // Amount of times that the scheduler switched the process on execution
-    int totalTime;              // Total amount of time to execute all processes
-}simulationData;
-
-
 
 // Functions declaration
 
@@ -66,19 +57,22 @@ int main (void)
 
 void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca)
 {
- 
     process *localProcList = cloneProcList(globaProcList, nProc);
+    FILE* out_robin = fopen("out_robin.txt", "w");
 
     int time = 0;              // Relógio da simulação (ms)
-    int finished = 0;          // Quantidade de processos finalizados
+    int finishedCount = 0;     // Quantidade de processos finalizados
 
     int current = -1;          // Índice do processo em execução (-1 = CPU livre)
     int quantumCounter = 0;    // Tempo já usado do quantum atual
 
+    int switchTimer = 0;       // Contador regressivo para o tempo de troca
+    int nextProcessId = -1;    // Quem será o próximo a assumir após a troca
+
     /* Fila de prontos (Round Robin usa fila) */
-    int readyQueue[1000];
+    int readyQueue[2000];
     int front = 0;
-    int rear = 0;
+    int rear  = 0;
 
     /* Controle para não inserir processo duas vezes */
     int inserted[nProc];
@@ -87,95 +81,127 @@ void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca)
     int finishTime[nProc];
 
     /* Inicializa todos como não inseridos */
-    for (int i = 0; i < nProc; i++)
-        inserted[i] = 0;
+    for (int i = 0; i < nProc; i++) inserted[i] = 0;
 
     int switchCount = 0;       // Número de trocas de contexto
     int overheadTime = 0;      // Tempo total gasto em trocas
 
-    printf("\n=== ROUND ROBIN ===\n");
-    printf("Linha do tempo:\n");
+    fprintf(out_robin, "\n=== ROUND ROBIN ===\n");
+    fprintf(out_robin, "Linha do tempo:\n");
 
     /* Loop principal: executa até todos os processos terminarem */
-    while (finished < nProc)
+    while (finishedCount < nProc)
     {
         /* 1) Verifica quais processos chegam neste instante */
         for (int i = 0; i < nProc; i++)
         {
-            if (localProcList[i].bornTime == time && !inserted[i])
+            if (localProcList[i].bornTime <= time && !inserted[i])
             {
                 /* Processo entra na fila de prontos */
                 readyQueue[rear++] = i;
                 inserted[i] = 1;
             }
         }
-
-        /* 2) Se a CPU está livre e há processos prontos, escalona */
-        if (current == -1 && front < rear)
+        
+        if (switchTimer > 0) 
         {
-            /* Remove o próximo processo da fila */
-            current = readyQueue[front++];
-            quantumCounter = 0;
+            fprintf(out_robin, "t=%d -> Escalonador\n", time);
+            switchTimer--;
+            overheadTime++;
 
-            /* Simula a troca de contexto */
-            for (int i = 0; i < tTroca; i++)
+            // Se o tempo de troca acabou, o processo assume a CPU
+            if (switchTimer == 0)
             {
-                printf("t=%d -> Escalonador\n", time);
-                time++;
+                current = nextProcessId;
+                quantumCounter = 0;
+                nextProcessId = -1; 
             }
-
-            switchCount++;
-            overheadTime += tTroca;
         }
-
-        /* 3) Executa 1 ms do processo atual */
-        if (current != -1)
+        
+        else if (current != -1) 
         {
-            printf("t=%d -> P%d\n", time, localProcList[current].ID);
-
+            fprintf(out_robin, "t=%d -> P%d\n", time, localProcList[current].ID); // [cite: 22, 72]
+            
             localProcList[current].remCpuTime--;
             quantumCounter++;
 
-            /* Caso o processo tenha terminado */
-            if (localProcList[current].remCpuTime == 0)
+            if (localProcList[current].remCpuTime == 0) 
             {
-                finishTime[current] = time + 1;
-                finished++;
-                current = -1;
+                finishTime[current] = time + 1; 
+                finishedCount++;
+                current = -1; 
             }
-            /* Caso o quantum tenha acabado */
-            else if (quantumCounter == quantum)
+            else if (quantumCounter == quantum) 
             {
-                /* Processo volta para o fim da fila */
                 readyQueue[rear++] = current;
                 current = -1;
             }
         }
-        else
-        {
-            /* CPU ociosa */
-            printf("t=%d -> IDLE\n", time);
-        }
 
-        /* Avança o tempo da simulação */
-        time++;
+        else 
+        {            
+            if (front < rear) 
+            {
+                nextProcessId = readyQueue[front++];
+                
+                if (tTroca > 0)
+                {
+                    switchCount++;
+                    switchTimer = tTroca;
+                    fprintf(out_robin, "t=%d -> Escalonador\n", time);
+                    switchTimer--;
+                    overheadTime++;
+                    
+                    if (switchTimer == 0)
+                    {
+                        current = nextProcessId;
+                        quantumCounter = 0;
+                        nextProcessId = -1;
+                    }
+                }
+                else
+                {
+                    current = nextProcessId;
+                    quantumCounter = 0;
+                    fprintf(out_robin, "t=%d -> P%d\n", time, localProcList[current].ID);
+                    localProcList[current].remCpuTime--;
+                    quantumCounter++;
+                }
+            }
+            else 
+            {
+                fprintf(out_robin, "t=%d -> IDLE\n", time);
+            }
+        }    
+        time++; 
     }
 
     /* 4) Cálculo do tempo médio de retorno */
-    float avgReturn = 0.0;
+    float totalTurnaround = 0.0;
     for (int i = 0; i < nProc; i++)
-        avgReturn += (finishTime[i] - localProcList[i].bornTime);
+        totalTurnaround += (finishTime[i] - localProcList[i].bornTime);
+    float overheadFraction = (time > 0) ? (float)overheadTime / time : 0.0;
 
-    avgReturn /= nProc;
 
     /* Resultados exigidos no PDF */
-    printf("\nResultados:\n");
-    printf("Tempo medio de retorno: %.2f\n", avgReturn);
-    printf("Numero de trocas de contexto: %d\n", switchCount);
-    printf("Overhead: %.2f\n", (float)overheadTime / time);
-    printf("Tempo total de execucao: %d\n", time);
+    fprintf(out_robin, "\n=== RESULTADOS ===\n");
+    fprintf(out_robin, "Tempo medio de retorno: %.2f\n", totalTurnaround / nProc); // [cite: 21, 68]
+    fprintf(out_robin, "Numero de chaveamento de processos: %d\n", switchCount); // [cite: 23, 69]
+    fprintf(out_robin, "Overhead de chaveamento: %.4f (%.2f%%)\n", overheadFraction, overheadFraction * 100); // 
+    fprintf(out_robin, "Tempo total de simulacao: %d ms\n", time); // [cite: 25, 71]    /* Libera a memória da cópia local */
 
-    /* Libera a memória da cópia local */
+    fclose(out_robin);
+    free(localProcList);
+}
+
+
+// Simulates a priority based algorithm to select the executing process
+void PriorityBased(process *globaProcList, int nProc, int tTroca)
+{
+    process* localProcList = cloneProcList(globaProcList, nProc);
+    FILE* out_priority = fopen("out_priority.txt", "w");
+
+    fclose(out_priority);
     free(localProcList);
 }
 
