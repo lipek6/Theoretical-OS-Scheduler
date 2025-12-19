@@ -1,0 +1,47 @@
+=== ROUND ROBIN ===
+Linha do tempo:
+t=0 -> Escalonador
+t=1 -> P1
+t=2 -> P1
+t=3 -> P1
+t=4 -> P1
+t=5 -> P1
+t=6 -> P1
+t=7 -> P1
+t=8 -> P1
+t=9 -> P1
+t=10 -> P1
+t=11 -> Escalonador
+t=12 -> P2
+t=13 -> P2
+t=14 -> P2
+t=15 -> P2
+t=16 -> P2
+t=17 -> P2
+t=18 -> P2
+t=19 -> P2
+t=20 -> P2
+t=21 -> P2
+t=22 -> Escalonador
+t=23 -> P3
+t=24 -> P3
+t=25 -> P3
+t=26 -> P3
+t=27 -> P3
+t=28 -> Escalonador
+t=29 -> P1
+t=30 -> P1
+t=31 -> P1
+t=32 -> P1
+t=33 -> P1
+t=34 -> P1
+t=35 -> P1
+t=36 -> P1
+t=37 -> P1
+t=38 -> P1
+
+=== RESULTADOS ===
+Tempo medio de retorno: 25.33
+Numero de chaveamento de processos: 4
+Overhead de chaveamento: 0.1026 (10.26%)
+Tempo total de simulacao: 39 ms

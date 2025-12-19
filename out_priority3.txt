@@ -1,0 +1,48 @@
+=== PRIORIDADE (PREEMPTIVO) ===
+Linha do tempo:
+t=0 -> Escalonador
+t=1 -> P1
+t=2 -> P1
+t=3 -> P1
+t=4 -> P1
+t=5 -> Escalonador
+t=6 -> P2
+t=7 -> P2
+t=8 -> Escalonador
+t=9 -> P3
+t=10 -> P3
+t=11 -> P3
+t=12 -> P3
+t=13 -> P3
+t=14 -> Escalonador
+t=15 -> P2
+t=16 -> P2
+t=17 -> P2
+t=18 -> P2
+t=19 -> P2
+t=20 -> P2
+t=21 -> P2
+t=22 -> P2
+t=23 -> Escalonador
+t=24 -> P1
+t=25 -> P1
+t=26 -> P1
+t=27 -> P1
+t=28 -> P1
+t=29 -> P1
+t=30 -> P1
+t=31 -> P1
+t=32 -> P1
+t=33 -> P1
+t=34 -> P1
+t=35 -> P1
+t=36 -> P1
+t=37 -> P1
+t=38 -> P1
+t=39 -> P1
+
+=== RESULTADOS ===
+Tempo medio de retorno: 21.33
+Numero de chaveamento de processos: 5
+Overhead de chaveamento: 0.1250 (12.50%)
+Tempo total de simulacao: 40 ms

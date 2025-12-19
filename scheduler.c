@@ -14,52 +14,95 @@ typedef struct
 // Functions declaration
 
 process* cloneProcList(process* ogProcList, int nProc);
-void PriorityBased(process *globaProcList, int nProc, int tTroca);
-void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca);
+void PriorityBased(process *globaProcList, int nProc, int tTroca, int test_count);
+void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca, int test_count);
 
 
 int main (void)
-{
-    FILE* input_file = fopen("input.txt", "r");
-    if(input_file == NULL)
+{   
+    int testcase_count = 0;
+
+    FILE* input_file;
+
+    while (testcase_count < 4)
     {
-        fprintf(stderr, "Failed opening/reading file, sorry bro\n");
-        return 1;
+        if (testcase_count == 0)
+        {
+            input_file = fopen("input.txt", "r");
+        } else if (testcase_count == 1)
+        {
+            input_file = fopen("input1.txt", "r");
+        } else if (testcase_count == 2)
+        {
+            input_file = fopen("input2.txt", "r");
+        } else if (testcase_count == 3)
+        {
+            input_file = fopen("input3.txt", "r");
+        }
+        
+        
+        if(input_file == NULL)
+        {
+            fprintf(stderr, "Failed opening/reading file, sorry bro\n");
+            return 1;
+        }
+
+        int nProc, quantum, tTroca;
+        if(fscanf(input_file, "%d, %d, %d", &nProc, &quantum, &tTroca) != 3)
+        {   // fscanf returns amount of things it has read, we can check it to avoid errors
+            fprintf(stderr, "Your input file is a mess, I failed getting the info I needed from it\n");
+            return 2;      
+        }
+
+
+        process *procList = malloc(sizeof(process) * nProc);
+        for(int i = 0; i < nProc; i++)
+        {
+            fscanf(input_file, "%d, %d, %d, %d",
+                &procList[i].ID,
+                &procList[i].bornTime,
+                &procList[i].priority,
+                &procList[i].reqCpuTime);
+            procList[i].remCpuTime = procList[i].reqCpuTime;
+        }
+        fclose(input_file);
+
+        RoundRobin(procList, nProc, quantum, tTroca, testcase_count);
+        PriorityBased(procList, nProc, tTroca, testcase_count);
+
+        free(procList);
+
+        testcase_count++;
     }
-
-    int nProc, quantum, tTroca;
-    if(fscanf(input_file, "%d, %d, %d", &nProc, &quantum, &tTroca) != 3)
-    {   // fscanf returns amount of things it has read, we can check it to avoid errors
-        fprintf(stderr, "Your input file is a mess, I failed getting the info I needed from it\n");
-        return 2;      
-    }
-
-
-    process *procList = malloc(sizeof(process) * nProc);
-    for(int i = 0; i < nProc; i++)
-    {
-        fscanf(input_file, "%d, %d, %d, %d",
-            &procList[i].ID,
-            &procList[i].bornTime,
-            &procList[i].priority,
-            &procList[i].reqCpuTime);
-        procList[i].remCpuTime = procList[i].reqCpuTime;
-    }
-    fclose(input_file);
-
-    RoundRobin(procList, nProc, quantum, tTroca);
-    PriorityBased(procList, nProc, tTroca);
-
-    free(procList);
+    
 }
 
 
 
-void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca)
+void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca, int test_count)
 {
     process *localProcList = cloneProcList(globaProcList, nProc);
-    FILE* out_robin = fopen("out_robin.txt", "w");
+    FILE* out_robin;
+    if (test_count == 0)
+    {
+        out_robin = fopen("out_robin.txt", "w");
+    } else if (test_count == 1)
+    {
+        out_robin = fopen("out_robin1.txt", "w");
+    }else if (test_count == 2)
+    {
+        out_robin = fopen("out_robin2.txt", "w");
+    }else if (test_count == 3)
+    {
+        out_robin = fopen("out_robin3.txt", "w");
+    }
 
+    if (out_robin == NULL)
+    {
+        fprintf(stderr, "Failed to create/write on the out_robin.txt file.\n");
+        free(localProcList);
+        return;
+    }
     
     int time = 0;              // Relógio da simulação (ms)
     int finishedCount = 0;     // Quantidade de processos finalizados
@@ -213,10 +256,25 @@ void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca)
 
 
 // Simulates a priority based algorithm to select the executing process
-void PriorityBased(process *globaProcList, int nProc, int tTroca)
+void PriorityBased(process *globaProcList, int nProc, int tTroca, int test_count)
 {
     process* localProcList = cloneProcList(globaProcList, nProc);
-    FILE* out_priority = fopen("out_priority.txt", "w");
+    FILE* out_priority;
+    
+    if (test_count == 0)
+    {
+        out_priority = fopen("out_priority.txt", "w");
+    } else if (test_count == 1)
+    {
+        out_priority = fopen("out_priority1.txt", "w");
+    } else if (test_count == 2)
+    {
+        out_priority = fopen("out_priority2.txt", "w");
+    } else if (test_count == 3)
+    {
+        out_priority = fopen("out_priority3.txt", "w");
+    }
+
     if (out_priority == NULL)
     {
         fprintf(stderr, "Failed to create/write on the out_priority.txt file.\n");
