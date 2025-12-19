@@ -7,7 +7,7 @@ O programa simula o comportamento da CPU utilizando dois algoritmos distintos:
 2.  **Prioridade** (Preemptivo)
 
 Foram usados para teste 4 casos, sendo um que foi dado pelo professor e 3 criados por nós
-As saídas são marcadas pelos prefixos **out** junto de um nome referente ao algoritmo de escalonamento que a gerou enquanto as entradas são chamadas de **input**, ambas variam de **0** (sem indicador aparente) à **3**
+As saídas são marcadas pelos prefixos **out** junto de um nome referente ao algoritmo de escalonamento que a gerou enquanto as entradas são chamadas de **input**, ambas variam de **0** (sem indicador aparente) à **4**
 
 ## 👥 Equipe
 * Arthur Dias de Oliveira

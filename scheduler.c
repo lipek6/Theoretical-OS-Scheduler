@@ -76,7 +76,6 @@ int main (void)
 
         testcase_count++;
     }
-    
 }
 
 
