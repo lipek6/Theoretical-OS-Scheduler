@@ -244,10 +244,10 @@ void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca, int 
 
     /* Resultados exigidos no PDF */
     fprintf(out_robin, "\n=== RESULTADOS ===\n");
-    fprintf(out_robin, "Tempo medio de retorno: %.2f\n", totalTurnaround / nProc); // [cite: 21, 68]
-    fprintf(out_robin, "Numero de chaveamento de processos: %d\n", switchCount); // [cite: 23, 69]
+    fprintf(out_robin, "Tempo medio de retorno: %.2f\n", totalTurnaround / nProc); 
+    fprintf(out_robin, "Numero de chaveamento de processos: %d\n", switchCount); 
     fprintf(out_robin, "Overhead de chaveamento: %.4f (%.2f%%)\n", overheadFraction, overheadFraction * 100); // 
-    fprintf(out_robin, "Tempo total de simulacao: %d ms\n", time); // [cite: 25, 71]    /* Libera a memória da cópia local */
+    fprintf(out_robin, "Tempo total de simulacao: %d ms\n", time); 
 
     fclose(out_robin);
     free(readyQueue);
