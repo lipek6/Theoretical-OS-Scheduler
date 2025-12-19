@@ -24,7 +24,7 @@ int main (void)
 
     FILE* input_file;
 
-    while (testcase_count < 4)
+    while (testcase_count < 5)
     {
         if (testcase_count == 0)
         {
@@ -38,8 +38,10 @@ int main (void)
         } else if (testcase_count == 3)
         {
             input_file = fopen("input3.txt", "r");
-        }
-        
+        } else if (testcase_count == 4)
+        {
+            input_file = fopen("input4.txt", "r");
+        }        
         
         if(input_file == NULL)
         {
@@ -95,6 +97,9 @@ void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca, int 
     }else if (test_count == 3)
     {
         out_robin = fopen("out_robin3.txt", "w");
+    }else if (test_count == 4)
+    {
+        out_robin = fopen("out_robin4.txt", "w");
     }
 
     if (out_robin == NULL)
@@ -273,6 +278,9 @@ void PriorityBased(process *globaProcList, int nProc, int tTroca, int test_count
     } else if (test_count == 3)
     {
         out_priority = fopen("out_priority3.txt", "w");
+    } else if (test_count == 4)
+    {
+        out_priority = fopen("out_priority4.txt", "w");
     }
 
     if (out_priority == NULL)
