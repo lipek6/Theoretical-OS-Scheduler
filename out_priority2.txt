@@ -28,7 +28,7 @@ t=24 -> P3
 t=25 -> P3
 
 === RESULTADOS ===
-Tempo medio de retorno: 6.00
+Tempo medio de retorno: 5.00
 Numero de chaveamento de processos: 3
 Overhead de chaveamento: 0.1154 (11.54%)
 Tempo total de simulacao: 26 ms

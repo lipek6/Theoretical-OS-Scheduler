@@ -227,7 +227,7 @@ t=223 -> P4
 t=224 -> P4
 t=225 -> P4
 t=226 -> P4
-t=227 -> Escalonador
+t=227 -> P4
 t=228 -> P4
 t=229 -> P4
 t=230 -> P4
@@ -247,10 +247,9 @@ t=243 -> P4
 t=244 -> P4
 t=245 -> P4
 t=246 -> P4
-t=247 -> P4
 
 === RESULTADOS ===
-Tempo medio de retorno: 137.60
-Numero de chaveamento de processos: 13
-Overhead de chaveamento: 0.0524 (5.24%)
-Tempo total de simulacao: 248 ms
+Tempo medio de retorno: 136.40
+Numero de chaveamento de processos: 12
+Overhead de chaveamento: 0.0486 (4.86%)
+Tempo total de simulacao: 247 ms

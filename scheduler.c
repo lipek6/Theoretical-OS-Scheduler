@@ -193,24 +193,31 @@ void RoundRobin(process *globaProcList, int nProc, int quantum, int tTroca, int 
         else if (current != -1) 
         {
             // ESTADO: EXECUTANDO PROCESSO
-            fprintf(out_robin, "t=%d -> P%d\n", time, localProcList[current].ID); // [cite: 22, 72]
+            fprintf(out_robin, "t=%d -> P%d\n", time, localProcList[current].ID); 
             
             localProcList[current].remCpuTime--;
             quantumCounter++;
 
             if (localProcList[current].remCpuTime == 0) 
             {
-                finishTime[current] = time + 1; 
+                finishTime[current] = time; 
                 finishedCount++;
                 current = -1; 
             }
             else if (quantumCounter == quantum) 
             {
-                readyQueue[tail] = current;
-                tail = (tail + 1) % nProc;
-                qCount++;
+                if (qCount > 0)
+                {
+                    readyQueue[tail] = current;
+                    tail = (tail + 1) % nProc;
+                    qCount++;
 
-                current = -1;
+                    current = -1;
+                }
+                else
+                {
+                    quantumCounter = 0;
+                }
             }
         }
 
@@ -385,7 +392,7 @@ void PriorityBased(process *globaProcList, int nProc, int tTroca, int test_count
                     localProcList[current].remCpuTime--;
                     if(localProcList[current].remCpuTime == 0)
                     {
-                       finishTime[current] = time + 1;
+                       finishTime[current] = time;
                        finishedCount++;
                        current = -1;
                     }
@@ -404,7 +411,7 @@ void PriorityBased(process *globaProcList, int nProc, int tTroca, int test_count
 
             if(localProcList[current].remCpuTime == 0)
             {
-                finishTime[current] = time+1;
+                finishTime[current] = time;
                 finishedCount++;
                 
                 current = -1;
